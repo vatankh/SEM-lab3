@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"ConnectToDB"},{"p":"<Unnamed>","l":"Point"},{"p":"<Unnamed>","l":"PointDateBean"},{"p":"<Unnamed>","l":"PollView"}];updateSearchResults();

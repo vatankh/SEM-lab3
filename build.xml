@@ -1,0 +1,186 @@
+<project name="Web3Lab" default="build" basedir=".">
+    <!-- Load properties -->
+    <property file="build.properties"/>
+
+    <!-- Define classpath -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <pathelement location="${jsf.api.jar}"/>
+        <pathelement location="${jsf.impl.jar}"/>
+        <pathelement location="${annotation.jar}"/>
+        <pathelement location="${postgresql.jar}"/>
+        <pathelement location="${inject.jar}"/>
+        <pathelement location="${validation.api.jar}"/>
+        <pathelement location="${eclipselink.jar}"/>
+        <pathelement location="${checker.qual.jar}"/>
+        <pathelement location="${jve.api.jar}"/>
+        <pathelement location="${lombok.jar}"/>
+        <pathelement location="${jsch.jar}"/>
+        <pathelement location="${cdi.jar}"/>
+        <pathelement location="${junit.jar}"/>
+        <pathelement location="${hamcrest.jar}"/>
+        <pathelement location="${resources.dir}"/> <!-- Add resources to classpath -->
+    </path>
+
+    <!-- Target to clean build directory -->
+    <target name="clean">
+        <echo message="***** Cleaning build directory *****"/>
+        <delete dir="${build.dir}"/>
+        <delete dir="${test.classes.dir}"/>  <!-- Also clean the test classes directory -->
+
+        <echo message="***** Clean complete *****"/>
+    </target>
+
+    <!-- Target to compile source code -->
+    <target name="compile" depends="clean">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" source="1.8" target="1.8"/>
+        <echo message="***** Compilation complete *****"/>
+    </target>
+
+    <!-- Target to create the JAR file -->
+    <target name="build" depends="compile">
+        <echo message="***** Building JAR file *****"/>
+        <mkdir dir="${build.dir}/jar"/>
+        <jar destfile="${build.dir}/jar/Web3Lab.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Manifest-Version" value="1.0"/>
+                <attribute name="Created-By" value="vatan"/>
+            </manifest>
+        </jar>
+        <echo message="***** JAR build complete *****"/>
+    </target>
+
+    <!-- Target to create the WAR file and include the JAR -->
+    <target name="build-war" depends="build">
+        <mkdir dir="${build.dir}/war"/>
+
+        <!-- Creating the WAR file -->
+        <war destfile="${build.dir}/war/Web3Lab.war" webxml="src/main/webapp/WEB-INF/web.xml">
+
+            <classes dir="${classes.dir}"/> <!-- Ensure compiled classes are added -->
+
+            <!-- Add compiled classes -->
+            <fileset dir="${classes.dir}"/>
+
+            <!-- Add web resources (JSF pages, static resources) -->
+            <fileset dir="src/main/webapp">
+                <exclude name="WEB-INF/web.xml"/>
+            </fileset>
+
+            <!-- Include the JAR file we built earlier -->
+            <fileset dir="${build.dir}/jar" includes="Web3Lab.jar"/>
+
+            <!-- Include JSF libraries in the WAR's lib directory -->
+            <lib dir="${lib.dir}" includes="jsf-api-2.2.20.jar, jsf-impl-2.2.18.jar, primefaces-8.0.jar, postgresql-42.7.2.jar, validation-api-1.1.0.Final.jar, javax.annotation-api-1.2.jar, javax.inject-1.jar, eclipselink-3.0.0-M1.jar, checker-qual-3.42.0.jar, jsch-0.1.55.jar, cdi-api-2.0.jar"/>
+            <fileset dir="${resources.dir}" includes="META-INF/beans.xml"/>
+
+        </war>
+
+
+        <echo message="***** WAR build complete *****"/>
+    </target>
+
+    <target name="test" depends="build">
+        <echo message="***** Running JUnit Tests *****"/>
+
+        <!-- Create directory for compiled test classes -->
+        <mkdir dir="${test.classes.dir}"/>
+
+        <!-- Compile the test classes -->
+        <javac srcdir="${test.src.dir}" destdir="${test.classes.dir}" classpathref="classpath">
+            <!-- Include compiled main classes in the classpath -->
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${classes.dir}"/> <!-- Include main compiled classes -->
+            </classpath>
+        </javac>
+
+        <!-- Run the tests using JUnit -->
+        <junit printsummary="on" haltonfailure="yes" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${classes.dir}"/> <!-- Include main compiled classes -->
+                <pathelement location="${test.classes.dir}"/> <!-- Include test compiled classes -->
+            </classpath>
+            <batchtest>
+                <fileset dir="${test.classes.dir}">
+                    <include name="**/*Test.class"/>
+                </fileset>
+            </batchtest>
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+        </junit>
+
+        <echo message="***** Tests Complete *****"/>
+    </target>
+    <target name="scp" depends="build" >
+        <echo>Sending..</echo>
+        <scp file="${build.dir}/jar/Web3Lab.jar"
+             todir="s291834@se.ifmo.ru:~/scp/"
+             password="RBTk>0502" trust="true" port="2222"/>
+        <echo>Sending success!</echo>
+    </target>
+    <target name="xml">
+        <echo message="***** XML Validation STARTED *****"/>
+
+        <!-- Validate all XML files in the webapp/WEB-INF and resources directories -->
+        <xmlvalidate lenient="true">
+            <!-- Include XML files in the WEB-INF folder -->
+            <fileset dir="src/main/webapp/WEB-INF">
+                <include name="**/*.xml"/>
+            </fileset>
+
+        </xmlvalidate>
+
+        <echo message="***** XML Validation COMPLETED *****"/>
+    </target>
+    <target name="doc" depends="build" >
+        <!-- Delete previous documentation build directory if it exists -->
+        <delete dir="${build.doc.dir}"/>
+
+        <!-- Create directories for temporary files and documentation -->
+        <mkdir dir="${build.tmp.dir}"/>
+        <mkdir dir="${build.doc.dir}"/>
+
+        <!-- Compute MD5 checksum -->
+        <checksum file="${build.dir}/jar/Web3Lab.jar" algorithm="MD5" property="md5"/>
+
+        <!-- Compute SHA-1 checksum -->
+        <checksum file="${build.dir}/jar/Web3Lab.jar" algorithm="SHA-1" property="sha1"/>
+
+        <!-- Generate Javadoc for all Java classes -->
+        <javadoc destdir="${build.doc.dir}" classpathref="classpath" sourcepath="${src.dir}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.java"/>
+            </fileset>
+        </javadoc>
+
+        <!-- Update JAR with the Javadoc files and add the checksums to the MANIFEST.MF -->
+        <jar destfile="${build.dir}/jar/Web3Lab.jar" update="true" basedir="${build.doc.dir}">
+            <!-- Add Javadoc files -->
+            <fileset dir="${build.doc.dir}">
+                <include name="**/*.html"/>
+            </fileset>
+            <!-- Add MD5 and SHA-1 checksums to the manifest -->
+            <manifest>
+                <attribute name="SHA-1" value="${sha1}"/>
+                <attribute name="MD5" value="${md5}"/>
+            </manifest>
+        </jar>
+
+        <!-- Optional: Output SHA-1 and MD5 values to a file -->
+        <echo file="output.txt">
+            SHA-1=${sha1}
+            MD5=${md5}
+        </echo>
+
+        <echo message="***** Documentation and Checksum Generation Complete *****"/>
+    </target>
+
+
+
+
+
+
+</project>

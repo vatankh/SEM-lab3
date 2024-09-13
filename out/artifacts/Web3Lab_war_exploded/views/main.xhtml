@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:jsp="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <title>Lab3</title>
+    <STYLE type="text/css">
+        .btn {
+        display: inline-block;
+        border: #2e6da4;
+        border-style: solid;
+        border-width: 2px;
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        background: linear-gradient(#FFFFFF, #B0B0B0);
+        font-weight: bold;
+        color: blue;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        margin-left: 5px;
+        vertical-align: middle;
+        }
+        .btn:hover {
+        background: linear-gradient(#152B40, #152B40);
+        color: white
+        }
+        .btn:focus {
+        background: linear-gradient(#152B40, #152B40);
+        color: white
+        }
+        .error{
+        background-color: red;
+        }
+        .normal{
+        background-color: inherit;
+        }
+        .button-selected {
+        border: 4px solid red;
+        display: inline-block;
+        border-style: solid;
+        border-width: 2px;
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        background-color: yellow;
+        font-weight: bold;
+        color: blue;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        margin-left: 5px;
+        vertical-align: middle;
+        }
+    </STYLE>
+
+    <script type="text/javascript">
+        function focusMe(button) {
+            var elem = document.getElementsByClassName("button-selected")[0];
+            // if element having class `"button-selected"` defined, do stuff
+            if (elem) {
+                elem.className = "";
+            }
+            button.className = "button-selected";
+        }
+    </script>
+    <!--<link href="style.css" rel="stylesheet" type="text/css"/>-->
+
+</h:head>
+<h:body style="text-align: center">
+    <div style="font-family: fantasy; font-size: 20px;">
+    </div>
+    <div id="chart" style="width: 60vw; margin: 0 auto;">
+    </div>
+    <h:form>
+        <p:panel header="Ввод параметров:">
+            <h:panelGrid>
+                <p:row>
+                    <p:column>
+                        X(-4 ... 4):
+                    </p:column>
+                    <p:column>
+                        <h:inputHidden id="x" value="#{pointDateBean.newPoint.x}"/>
+                        <h:commandButton onclick="focusMe(this)" value="-4" actionListener="#{pointDateBean.newPoint.setX(-4)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="-3" actionListener="#{pointDateBean.newPoint.setX(-3)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="-2" actionListener="#{pointDateBean.newPoint.setX(-2)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="-1" actionListener="#{pointDateBean.newPoint.setX(-1)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="0" actionListener="#{pointDateBean.newPoint.setX(0)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="1" actionListener="#{pointDateBean.newPoint.setX(1)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="2" actionListener="#{pointDateBean.newPoint.setX(2)}">
+                        <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="3" actionListener="#{pointDateBean.newPoint.setX(3)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                        <h:commandButton onclick="focusMe(this)" value="4" actionListener="#{pointDateBean.newPoint.setX(4)}">
+                            <f:ajax execute="@parent" render="x"/>
+                        </h:commandButton>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column>
+                        Y(-3 ... 3):
+                    </p:column>
+                    <p:column>
+                        <p:inputText id="input1" onchange="setY()"
+                                       value="#{pointDateBean.newPoint.y}"
+                                       decimalSeparator="."
+                                       minValue="-3" maxValue="3"
+                                       decimalPlaces="2"
+                                       autocomplete="off"
+                                       thousandSeparator="false"
+                                       required="true"
+                        />
+
+                        <h:inputHidden id="y" value="#{pointDateBean.newPoint.y}" />
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column>
+                        R(2 ... 5):
+                    </p:column>
+                    <p:column>
+                        <p:inputText id="input2" onchange="draw(1)"
+                                     value="#{pointDateBean.newPoint.r}"
+                                     decimalSeparator="."
+                                     minValue="2" maxValue="5"
+                                     decimalPlaces="2"
+                                     autocomplete="off"
+                                     thousandSeparator="false"
+                                     required="true"
+                        />
+                        <h:inputHidden id="r" value="#{pointDateBean.newPoint.r}" class="error"/>
+                    </p:column>
+                </p:row>
+            </h:panelGrid>
+            <p:commandButton id="out_button"
+                             value="ВВОД"
+                             ajax="false"
+                             action="#{pointDateBean.doCode}"/>
+        </p:panel>
+    </h:form>
+    <h:form style="border-width:2px; margin: 0 auto; padding: 1%; border-color:#949494; border-style:solid; width: 35%">
+        <p:button outcome="to_index" value="Go to clock" icon="pi"/>
+    </h:form>
+    <h:panelGroup id="entriesTable">
+        <h:dataTable id="table_out_data" value="#{pointDateBean.pointsTable}" var="point"
+                     style="width: 100%; border-width:2px; margin: 0 auto; border-color:black; border-style:solid;">
+            <h:column>
+                <f:facet name="header">X</f:facet>
+                #{point.x}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Y</f:facet>
+                #{point.y}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">R</f:facet>
+                #{point.r}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Result</f:facet>
+                #{point.res}
+            </h:column>
+        </h:dataTable>
+    </h:panelGroup>
+    <h:outputScript library="Js_J" name="draw.js"/>
+
+</h:body>
+</html>
